@@ -8,6 +8,8 @@
     }
 
     function onReady(smart)  {
+      $( "#fromDate" ).datepicker();
+      $( "#toDate" ).datepicker(); 
       if (smart.hasOwnProperty('patient')) {
         var patient = smart.patient;
         var pt = patient.read();
