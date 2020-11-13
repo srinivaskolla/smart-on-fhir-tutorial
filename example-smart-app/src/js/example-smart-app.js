@@ -25,14 +25,12 @@
 
         $.when(pt, obv).fail(onError);
 
-        $.when(pt, obv).done(function(patient, obv) {
-          
+        $.when(pt, obv).done(function(patient, obv) { 
           var byCodes = smart.byCodes(obv, 'code');
-          
+          var gender = patient.gender;
+
           window.__obv = (obv);
           window.__myByCodes = byCodes;
-          
-          var gender = patient.gender;
 
           var fname = '';
           var lname = '';
@@ -42,9 +40,11 @@
             lname = patient.name[0].family.join(' ');
           }
 
-          var height = byCodes('8302-2');
-          var systolicbp = getBloodPressureValue(byCodes('55284-4'),'8480-6');
-          var diastolicbp = getBloodPressureValue(byCodes('55284-4'),'8462-4');
+          var height = byCodes('8302-2'); 
+		      var spO2 = byCodes("59408-5"); 
+          var systolicbp = getBloodPressure(byCodes('55284-4'),'8480-6');
+          var diastolicbp = getBloodPressure(byCodes('55284-4'),'8462-4');
+		  
           var hdl = byCodes('2085-9');
           var ldl = byCodes('2089-1');
 
@@ -92,9 +92,8 @@
     };
   }
 
-  function getBloodPressureValue(BPObservations, typeOfPressure) {
-    var formattedBPObservations = [];
-    console.log(BPObservations);
+  function getBloodPressure(BPObservations, typeOfPressure) {
+    var formattedBPObservations = []; 
     BPObservations.forEach(function(observation){
       var BP = observation.component.find(function(component){
         return component.code.coding.find(function(coding) {
@@ -103,36 +102,93 @@
       });
       if (BP) {
         observation.valueQuantity = BP.valueQuantity;
-        formattedBPObservations.push(observation);
+        var bpObj  = getQuantityValueAndUnit(observation);
+        bpObj.ts = new Date(BP.effectiveDateTime).getTime();
+        formattedBPObservations.push(bpObj);
       }
     });
 
-    return getQuantityValueAndUnit(formattedBPObservations[0]);
+    return  formattedBPObservations;
   }
 
   function getQuantityValueAndUnit(ob) {
+    var obj = {};
     if (typeof ob != 'undefined' &&
         typeof ob.valueQuantity != 'undefined' &&
         typeof ob.valueQuantity.value != 'undefined' &&
         typeof ob.valueQuantity.unit != 'undefined') {
-          return ob.valueQuantity.value + ' ' + ob.valueQuantity.unit;
+        obj.val = ob.valueQuantity.value;
+        obj.unit = ob.valueQuantity.unit; 
+        return obj;
     } else {
-      return undefined;
+      return null;
     }
   }
 
-  window.drawVisualization = function(p) {
+  function flotToolTip(catg, x, y)
+	{ 
+		  var d = new Date(x);
+		  var dt = $.datepicker.formatDate("mm/dd/yy", d);
+		  var h = padZero(d.getHours(), 2);
+		  var m = padZero(d.getMinutes(), 2); 
+		  var s = padZero(d.getSeconds(), 2);
+		  dt += " " +  h + ":" + m + ":" + s;
+		  var dh = "<div class='" + catg.toLowerCase().trim() + "'></div><span>" + catg + "   " + y + "</span>"; 
+		  return ("<div class='tth'>" + dt + "</div>" + dh  );
+	}
+
+  function padZero(number, length)
+  {
+    var str = '' + number;
+    while (str.length < length) {
+      str = '0' + str;
+    } 
+    return str;
+  } 
+
+  function drawVitalSignsChart(p)
+  {
+    var nd1 = []; 
+		$.each(p.systolicbp, function(i, obj){
+		   nd1.push( [obj.ts , obj.val] );
+		}); 
+		
+		var nd2 = [];
+		$.each(p.diastolicbp, function(i, obj){
+		   nd2.push( [obj.ts, obj.val] );
+    });
+    
+    var flot_options = {
+			series: {
+				lines: { show: true, lineWidth: 1 },
+				points: { show: true }
+			}, 
+			xaxis: { mode: "time" },
+			grid: { hoverable: true, clickable: true },
+			tooltip: { show: true, content: flotToolTip  },
+			ticks: { showTickLabels: true }
+		};
+
+		var dataArr = [
+			{ data: nd1, label: "Systloic ", lines: { show: true  }, color: "#edc240"},
+			{ data: nd2, label: "Diastolic ", lines: { show: true }, color: "#afd8f8"}
+		];
+
+		$.plot("#rtvAdvChart", dataArr, flot_options);
+  }
+
+  window.drawVisualization = function(p) 
+  {
     $('#holder').show();
     $('#loading').hide();
     $('#fname').html(p.fname);
     $('#lname').html(p.lname);
     $('#gender').html(p.gender);
     $('#birthdate').html(p.birthdate);
-    $('#height').html(p.height);
-    $('#systolicbp').html(p.systolicbp);
-    $('#diastolicbp').html(p.diastolicbp);
+    $('#height').html(p.height); 
     $('#ldl').html(p.ldl);
     $('#hdl').html(p.hdl);
+    drawVitalSignsChart(p);
   };
 
 })(window);
