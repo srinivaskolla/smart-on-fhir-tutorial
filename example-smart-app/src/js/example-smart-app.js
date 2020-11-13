@@ -41,7 +41,7 @@
           }
 
           var height = byCodes('8302-2'); 
-		      var spO2 = byCodes("59408-5"); 
+          var spO2 = byCodes("59408-5"); 
           var systolicbp = getBloodPressure(byCodes('55284-4'),'8480-6');
           var diastolicbp = getBloodPressure(byCodes('55284-4'),'8462-4');
 		  
@@ -103,7 +103,7 @@
       if (BP) {
         observation.valueQuantity = BP.valueQuantity;
         var bpObj  = getQuantityValueAndUnit(observation);
-        bpObj.ts = new Date(BP.effectiveDateTime).getTime();
+        bpObj.ts = new Date(observation.effectiveDateTime).getTime();
         formattedBPObservations.push(bpObj);
       }
     });
@@ -148,33 +148,33 @@
 
   function drawVitalSignsChart(p)
   {
-    var nd1 = []; 
-		$.each(p.systolicbp, function(i, obj){
-		   nd1.push( [obj.ts , obj.val] );
-		}); 
-		
-		var nd2 = [];
-		$.each(p.diastolicbp, function(i, obj){
-		   nd2.push( [obj.ts, obj.val] );
-    });
+	var nd1 = []; 
+	$.each(p.systolicbp, function(i, obj){
+	   nd1.push( [obj.ts , obj.val] );
+	}); 
+
+	var nd2 = [];
+	$.each(p.diastolicbp, function(i, obj){
+	   nd2.push( [obj.ts, obj.val] );
+	});
     
-    var flot_options = {
-			series: {
-				lines: { show: true, lineWidth: 1 },
-				points: { show: true }
-			}, 
-			xaxis: { mode: "time" },
-			grid: { hoverable: true, clickable: true },
-			tooltip: { show: true, content: flotToolTip  },
-			ticks: { showTickLabels: true }
-		};
+	var flot_options = {
+		series: {
+			lines: { show: true, lineWidth: 1 },
+			points: { show: true }
+		}, 
+		xaxis: { mode: "time" },
+		grid: { hoverable: true, clickable: true },
+		tooltip: { show: true, content: flotToolTip  },
+		ticks: { showTickLabels: true }
+	};
 
-		var dataArr = [
-			{ data: nd1, label: "Systloic ", lines: { show: true  }, color: "#edc240"},
-			{ data: nd2, label: "Diastolic ", lines: { show: true }, color: "#afd8f8"}
-		];
+	var dataArr = [
+		{ data: nd1, label: "Systloic ", lines: { show: true  }, color: "#edc240"},
+		{ data: nd2, label: "Diastolic ", lines: { show: true }, color: "#afd8f8"}
+	];
 
-		$.plot("#rtvAdvChart", dataArr, flot_options);
+	$.plot("#rtvAdvChart", dataArr, flot_options);
   }
 
   window.drawVisualization = function(p) 
