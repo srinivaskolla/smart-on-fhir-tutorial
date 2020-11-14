@@ -87,8 +87,8 @@
       gender: {value: ''},
       birthdate: {value: ''},
       height: {value: ''},
-      systolicbp: {value: ''},
-      diastolicbp: {value: ''},
+      systolicbp: [],
+      diastolicbp: [],
       ldl: {value: ''},
       hdl: {value: ''},
     };
@@ -105,6 +105,8 @@
       if (BP) {
         observation.valueQuantity = BP.valueQuantity;
         var bpObj  = getQuantityValueAndUnit(observation); 
+	bpObj.high = BP.referenceRange[0].high.value;
+	bpObj.low = BP.referenceRange[0].low.value;
         formattedBPObservations.push(bpObj);
       }
     });
@@ -120,8 +122,7 @@
         typeof ob.valueQuantity.unit != 'undefined') {
         obj.val = ob.valueQuantity.value;
         obj.unit = ob.valueQuantity.unit; 
-	obj.ts = new Date(ob.effectiveDateTime).getTime();
-	// obj.low =  
+	obj.ts = new Date(ob.effectiveDateTime).getTime(); 
         return obj;
     } else {
       return null;
@@ -152,13 +153,21 @@
   function drawVitalSignsChart(p)
   {
 	var nd1 = []; 
+	var nd1_low = [];
+	var nd1_high = [];
 	$.each(p.systolicbp, function(i, obj){
 	   nd1.push( [obj.ts , obj.val] );
+	   nd1_high.push( [obj.ts, obj.high]);
+	   nd1_low.push( [obj.ts, obj.low]);
 	}); 
 
 	var nd2 = [];
+	var nd2_low = [];
+	var nd2_high = [];
 	$.each(p.diastolicbp, function(i, obj){
 	   nd2.push( [obj.ts, obj.val] );
+	   nd2_high.push( [obj.ts, obj.high]);
+	   nd2_low.push( [obj.ts, obj.low]);
 	});
     
 	var flot_options = {
@@ -174,6 +183,8 @@
 
 	var dataArr = [
 		{ data: nd1, label: "Systloic ", lines: { show: true  }, color: "#edc240"},
+		{ data: nd1_low, label: "Systloic Low Value", lines: { show: true  }, color: "#edc240", points: { show: false} },
+		{ data: nd1_high, label: "Systloic High Value", lines: { show: true  }, color: "#edc240", points: { show: false} },
 		{ data: nd2, label: "Diastolic ", lines: { show: true }, color: "#afd8f8"}
 	];
 
