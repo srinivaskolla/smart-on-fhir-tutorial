@@ -4,7 +4,8 @@ th, td {
 }
 
 body {
-  margin: 0;
+  margin: 5px;
+  font-family: tahoma;
 }
 
 #holder {
@@ -21,7 +22,6 @@ body {
   width: 18px;
   height: 18px;
   background-color: #000;
-
   border-radius: 100%;
   display: inline-block;
   -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
@@ -39,7 +39,7 @@ body {
 }
 
 .demo-placeholder {
-	width: 500px;
+	width: 80%;
 	height: 500px;
 	font-size: 12px;
 }
