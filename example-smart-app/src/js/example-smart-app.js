@@ -104,8 +104,7 @@
       });
       if (BP) {
         observation.valueQuantity = BP.valueQuantity;
-        var bpObj  = getQuantityValueAndUnit(observation);
-        bpObj.ts = new Date(observation.effectiveDateTime).getTime();
+        var bpObj  = getQuantityValueAndUnit(observation); 
         formattedBPObservations.push(bpObj);
       }
     });
@@ -121,20 +120,22 @@
         typeof ob.valueQuantity.unit != 'undefined') {
         obj.val = ob.valueQuantity.value;
         obj.unit = ob.valueQuantity.unit; 
+	obj.ts = new Date(ob.effectiveDateTime).getTime();
+	// obj.low =  
         return obj;
     } else {
       return null;
     }
   }
 
-  function flotToolTip(catg, x, y)
+	function flotToolTip(catg, x, y)
 	{ 
 		  var d = new Date(x);
 		  var dt = $.datepicker.formatDate("mm/dd/yy", d);
 		  var h = padZero(d.getHours(), 2);
 		  var m = padZero(d.getMinutes(), 2); 
-		  var s = padZero(d.getSeconds(), 2);
-		  dt += " " +  h + ":" + m + ":" + s;
+		 // var s = padZero(d.getSeconds(), 2);
+		  dt += " " +  h + ":" + m ;  
 		  var dh = "<div class='" + catg.toLowerCase().trim() + "'></div><span>" + catg + "   " + y + "</span>"; 
 		  return ("<div class='tth'>" + dt + "</div>" + dh  );
 	}
